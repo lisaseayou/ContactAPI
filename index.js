@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
-// require("./routes")(app);
+
 
 const port = process.env.PORT || 3030;
 
@@ -50,6 +50,40 @@ app.delete("/api/contact/:id", (req, res) => {
         res.status(500).send("Error deleting a contact");
       } else {
         res.status(200).send("Contact successfully deleted");
+      }
+    }
+  );
+});
+
+app.put('/api/contact/:id', (req, res) => {
+  const contactId = req.params.id;
+  connection.query(
+    'SELECT * FROM contact WHERE id = ?',
+    [contactId],
+    (err, selectResults) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send('Error updating a contact');
+      } else {
+        const contactFromDb = selectResults[0];
+        if (contactFromDb) {
+          const contactToUpdate = req.body;
+          connection.query(
+            'UPDATE contact SET ? WHERE id = ?',
+            [contactToUpdate, contactId],
+            (err) => {
+              if (err) {
+                console.log(err);
+                res.status(500).send('Error updating a contact');
+              } else {
+                const updated = { ...contactFromDb, ...contactToUpdate };
+                res.status(200).json(updated);
+              }
+            }
+          );
+        } else {
+          res.status(404).send(`Contact with id ${contactId} not found.`);
+        }
       }
     }
   );
