@@ -12,8 +12,8 @@ app.use(cors());
 
 const port = process.env.PORT || 3030;
 
-app.get("/api/members", (request, res) => {
-  connection.query("SELECT * FROM members", (err, result) => {
+app.get("/api/contact", (request, res) => {
+  connection.query("SELECT * FROM contact", (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).send("Error retrieving data from database");
@@ -23,17 +23,33 @@ app.get("/api/members", (request, res) => {
   });
 });
 
-app.post("/api/members", (req, res) => {
-  const { name } = req.body;
+app.post("/api/contact", (req, res) => {
+  const { firstname, lastname, email } = req.body;
   connection.query(
-    "INSERT INTO members (name) VALUES (?)",
-    [name],
+    "INSERT INTO contact (firstname, lastname, email) VALUES (?, ?, ?)",
+    [firstname, lastname, email],
     (err, result) => {
       if (err) {
         console.error(err);
-        res.status(500).send("Error saving the member");
+        res.status(500).send("Error saving the contact");
       } else {
-        res.status(200).send("Member successfully saved");
+        res.status(200).send("Contact successfully saved");
+      }
+    }
+  );
+});
+
+app.delete("/api/contact/:id", (req, res) => {
+  const contactId = req.params.id;
+  connection.query(
+    "DELETE FROM contact WHERE id = ?",
+    [contactId],
+    (err, results) => {
+      if (err) {
+        console.log(err)
+        res.status(500).send("Error deleting a contact");
+      } else {
+        res.status(200).send("Contact successfully deleted");
       }
     }
   );
